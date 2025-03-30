@@ -1,27 +1,23 @@
+// Enviroment Variables
+require('dotenv').config();
+const port = process.env.PORT;
+const mongoConnect = process.env.MONGO_CONNECT;
+
+// dependancies 
 const express = require('express');
 const session = require('express-session');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const MongoClient = require("mongodb-legacy").MongoClient
+const client = new MongoClient(mongoConnect);
 const crypto = require('crypto');
-require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT;
-const uri = process.env.MONGO_CONNECT;
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 
 // generates a random hex string for the session secret.
 const sessionSecret = crypto.randomBytes(32).toString('hex');
 
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
-
 const db = client.db('Question-Board')
 const questions = db.collection('questions');
+const users = db.collection('users')
 
 app.use(express.json());
 app.set('view engine', 'ejs');
@@ -30,21 +26,87 @@ app.use(session({
     resave: true,
     saveUninitialized: false
 }));
+const bodyParser = require('body-parser');
+app.use(express.urlencoded({ extended: true }));
 
 
 app.use(express.static('public'))
 
-// Sample route
+
 app.get('/', (req, res) => {
-    res.render('index.ejs');
+    if (!req.session.loggedin) {
+        console.log("not logged in. Redirecting to login")
+        res.render('pages/login.ejs');
+    }
+    else {
+        users.findOne({ "username": req.session.currentuser }, function (err, userresult) {
+            if (err) throw err;
+            res.render('pages/index.ejs', {
+                user: userresult
+            })
+        })
+    }
+})
+
+app.get('/getQuestions', async (req, res) => {
+    const data = await questions.find().toArray()
+    console.table(data)
+    res.json(data)
+})
+
+app.get('/login', (req, res) => {
+    res.render('pages/login');
+})
+
+app.get('/register', (req, res) => {
+    res.render('pages/register');
+})
+
+app.get('/getCurrentUser', (req, res) => {
+    res.json({
+        currentuser: req.session.currentuser
+    });
 });
 
-// Start the server
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+
+app.post('/dologin', async (req, res) => {
+
+    console.log(JSON.stringify(req.body))
+    users.findOne({
+        "username": req.body.username
+    }, function (err, result) {
+        if (err) throw err;
+        console.log(JSON.stringify(result))
+        if (!result) {
+            res.send("<script>alert('invalid Username')</script>;window.location.href = '/login';")
+        }
+
+        else if (result.password != req.body.password) {
+            res.send("<script>alert('incorrect password')</script>;window.location.href = '/login';")
+        }
+
+        else if (result.password == req.body.password && result.username == req.body.username) {
+            req.session.loggedin = true;
+            req.session.currentuser = req.body.username;
+            res.redirect("/")
+        }
+    })
+})
+
+app.post('/postQuestion', async (req, res) => {
+    try {
+        await questions.insertOne(req.body)
+        res.status(200).json({ message: 'Success' });
+    }
+
+    catch(error){
+        console.error(error)
+    }
 });
 
-async function connectDb() {
+
+
+async function connectmongoDb() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
@@ -56,14 +118,8 @@ async function connectDb() {
     }
 }
 
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});
 
-function readDb() {
-    try {
-        console.log('All data:', data);
-    }
-    catch (err) {
-        console.error('Error fetching data:', err);
-    }
-}
-
-connectDb();
+connectmongoDb();

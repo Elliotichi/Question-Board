@@ -1,0 +1,59 @@
+:root{
+    --background: #3E3E42;
+    --text: #eeeeee;
+    --questionBox: #252526;
+    --footerColour: #007ACC;
+}
+
+body{
+    margin: 0;
+    height: 100%;
+    background-color: var(--background);
+    color: var(--text);
+}
+
+
+.postSection {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 16px; 
+}
+
+.questionBox{
+    margin-left: 2%;
+    margin-top: 2%;
+    padding: 5px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: var(--questionBox);
+}
+
+.fixed {
+    position: fixed;
+    bottom: 0;              
+    left: 0;               
+    width: 100%; 
+    padding: 5px;          
+    background-color: var(--footerColour);
+    text-align: center;     
+    z-index: 1000;          
+}
+
+.postWindow{
+    position: fixed;              /* Fixes the div in place relative to the viewport */
+    top: 50%;                     /* Position the div halfway down the page */
+    left: 50%;                    /* Position the div halfway across the page */
+    transform: translate(-50%, -50%); /* Offset the div by half of its width and height to center it */
+    background-color: white;      /* Optional: Background color for the popup */
+    padding: 20px;                /* Optional: Padding inside the popup */
+    border-radius: 8px;           /* Optional: Rounded corners */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Optional: Add a slight shadow */
+    z-index: 1000;                /* Make sure the popup appears above other elements */
+    width: 300px;                 /* Optional: Set a fixed width for the popup */
+    max-width: 80%;               /* Optional: Set max width to ensure it doesn't stretch too wide */
+    box-sizing: border-box;       /* Ensure padding is included in width calculation */
+}
