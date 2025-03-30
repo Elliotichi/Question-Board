@@ -8,6 +8,7 @@ const express = require('express');
 const session = require('express-session');
 const MongoClient = require("mongodb-legacy").MongoClient
 const client = new MongoClient(mongoConnect);
+const { ObjectId } = require('mongodb');
 const crypto = require('crypto');
 
 const app = express();
@@ -96,6 +97,22 @@ app.post('/dologin', async (req, res) => {
 app.post('/postQuestion', async (req, res) => {
     try {
         await questions.insertOne(req.body)
+        res.status(200).json({ message: 'Success' });
+    }
+
+    catch(error){
+        console.error(error)
+    }
+});
+
+app.post('/updateQuestion', async (req, res) => {
+    try {
+        const questionId = new ObjectId(req.body._id);
+        console.log("updating entry with", req.body)
+        await questions.updateOne(
+            {_id: questionId},
+            {$set:{ upvotes:req.body.upvotes, viewers:req.body.viewers}}
+        )
         res.status(200).json({ message: 'Success' });
     }
 
