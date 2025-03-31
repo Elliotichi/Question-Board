@@ -60,6 +60,7 @@ function makeComponents(question) {
             console.log(question.viewers)
             question.upvotes++;
             console.log(question.upvotes)
+            upvoteBtn.addClass('active')
         }
 
         // toggles upvote

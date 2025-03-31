@@ -163,7 +163,7 @@ app.post('/registerUser', async (req, res) => {
     }
 
     // checks if user already exists
-    existingUser = users.findOne({ "username": req.body.username })
+    existingUser = await users.findOne({ "username": req.body.username })
     console.log(existingUser)
     if (existingUser) {
         res.send("<script>alert('Account Name already in use, please enter a different one');window.location.href = '/register';</script>")
