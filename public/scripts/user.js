@@ -4,8 +4,6 @@ let ishost;
 // document ready function, just shoiws information to the user of rtheir login
 $(document).ready(async function () {
     await getSession(); 
-    console.log('im here');
-    console.log(username);
 
     $('#userInfo').text('logged in as: ' + username); 
 

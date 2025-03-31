@@ -1,30 +1,10 @@
 let questionList = [];
 
 $(document).ready(function () {
-    console.log("index script launched loaded")
     getQuestions()
-
 })
 
-function getQuestions() {
-    console.log("getting questions")
-
-    $.ajax({
-        type: 'GET',
-        url: '/getQuestions',
-        success: function (response) {
-            console.log('Questions Retrieved');
-            populateQuestionList(response);
-        },
-        error: function (xhr, status, error) {
-            console.error('Error:', error);
-        }
-    });
-
-    
-
-}
-
+// gets the top 5 voted question and makes componets for each of them
 function populateQuestionList(array) {
     questionList = []
     $('#hostBox').empty()
@@ -38,7 +18,7 @@ function populateQuestionList(array) {
     }
 }
 
-
+// makes components for passed in questions
 function makeComponents(question, i) {
     console.log("making components")
     const questionBox = $("<div class='hostQuestionBox'></div>");
@@ -51,4 +31,20 @@ function makeComponents(question, i) {
     textBox.append(rank,questionText,authorText,votes);
     questionBox.append(textBox);
     $('#hostBox').append(questionBox);
+}
+
+/*ajax calls*/
+
+//Retrievs questions from database.
+function getQuestions() {
+    $.ajax({
+        type: 'GET',
+        url: '/getQuestions',
+        success: function (response) {
+            populateQuestionList(response);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error:', error);
+        }
+    });
 }

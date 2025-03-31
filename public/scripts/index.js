@@ -3,7 +3,6 @@ let user;
 
 // doc ready fuction
 $(document).ready(function () {
-    console.log("index script launched loaded")
     getQuestions()
     getSession()
 
@@ -118,7 +117,7 @@ function makePostWindow() {
             alert("please enter a question.");
             return;
         }
-        
+
         let question = { 'author': user, 'text': text, 'upvotes': 0, 'viewers': [] }
         await postQuestion(question)
         console.log("i resolved")
