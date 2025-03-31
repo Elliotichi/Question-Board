@@ -90,9 +90,10 @@ app.post('/dologin', async (req, res) => {
 
     console.log(JSON.stringify(req.body))
     user = await users.findOne({ "username": req.body.username })
-
+    console.log(user)
     if (!user) {
         res.send("<script>alert('invalid Username');window.location.href = '/login';</script>")
+        return
     }
 
     const isMatch = await bcrypt.compare(req.body.password, user.password);
