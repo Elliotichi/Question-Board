@@ -2,6 +2,10 @@ let questionList = [];
 
 $(document).ready(function () {
     getQuestions()
+
+    $('#refreshBtn').click(function(){
+        getQuestions()
+    })
 })
 
 // gets the top 5 voted question and makes componets for each of them

@@ -11,6 +11,7 @@ const MongoClient = require("mongodb-legacy").MongoClient
 const client = new MongoClient(mongoConnect);
 const { ObjectId } = require('mongodb');
 const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 
 const app = express();
 
@@ -88,26 +89,24 @@ app.get('/getSession', (req, res) => {
 app.post('/dologin', async (req, res) => {
 
     console.log(JSON.stringify(req.body))
-    users.findOne({
-        "username": req.body.username
-    }, function (err, result) {
-        if (err) throw err;
-        console.log(JSON.stringify(result))
-        if (!result) {
-            res.send("<script>alert('invalid Username');window.location.href = '/login';</script>")
-        }
+    user = await users.findOne({ "username": req.body.username })
 
-        else if (result.password != req.body.password) {
-            res.send("<script>alert('incorrect password');window.location.href = '/login';</script>")
-        }
+    if (!user) {
+        res.send("<script>alert('invalid Username');window.location.href = '/login';</script>")
+    }
 
-        else if (result.password == req.body.password && result.username == req.body.username) {
-            req.session.loggedin = true;
-            req.session.currentuser = req.body.username;
-            req.session.ishost = result.host
-            res.redirect("/")
-        }
-    })
+    const isMatch = await bcrypt.compare(req.body.password, user.password);
+
+    if (!isMatch) {
+        res.send("<script>alert('incorrect password');window.location.href = '/login';</script>")
+    }
+
+    else {
+        req.session.loggedin = true;
+        req.session.currentuser = req.body.username;
+        req.session.ishost = user.host
+        res.redirect("/")
+    }
 })
 
 // logs user out
@@ -152,6 +151,9 @@ app.post('/updateQuestion', async (req, res) => {
 app.post('/registerUser', async (req, res) => {
     let host;
 
+    // hashes the password
+    const password = await bcrypt.hash(req.body.password, 10)
+
     // check if the host option is ticked
     if (req.body.host == "on") {
         host = true
@@ -161,35 +163,29 @@ app.post('/registerUser', async (req, res) => {
     }
 
     // checks if user already exists
-    users.findOne({
-        $or: [
-            { "username": req.body.username }
-        ]
-    }, async function (err, existingUser) {
-        if (err) throw err;
-        if (existingUser) {
-            console.log('user exists')
-            res.send("<script>alert('Account Name already in use, please enter a different one');window.location.href = '/register';</script>")
-        }
-        // if user doesnt exist add user to database
-        else {
+    existingUser = users.findOne({ "username": req.body.username })
 
-            await users.insertOne(
-                {
-                    username: req.body.username,
-                    password: req.body.password,
-                    host: host
-                }
-            )
-            req.session.loggedin = true;
-            req.session.currentuser = req.body.username;
-            req.session.ishost = host
-            res.redirect('/')
+    if (existingUser) {
+        res.send("<script>alert('Account Name already in use, please enter a different one');window.location.href = '/register';</script>")
+    }
+    
+    // if user doesnt exist add user to database
+    else {
 
-        }
-    })
-});
+        await users.insertOne(
+            {
+                username: req.body.username,
+                password: password,
+                host: host
+            }
+        )
+        req.session.loggedin = true;
+        req.session.currentuser = req.body.username;
+        req.session.ishost = host
+        res.redirect('/')
 
+    }
+})
 
 // connect method for mongoDB
 async function connectmongoDb() {
