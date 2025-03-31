@@ -129,6 +129,37 @@ app.post('/updateQuestion', async (req, res) => {
     }
 });
 
+app.post('/registerUser', async (req, res) => {
+    users.findOne({
+        $or: [
+            { "username": req.body.username }
+        ]
+    }, async function (err, existingUser) {
+        if (existingUser) {
+            console.log('user exists')
+            res.redirect('/login')
+        }
+        else {
+            try {
+                await users.insertOne(
+                    {
+                        username: req.body.username,
+                        password: req.body.password
+                    }
+                )
+                req.session.loggedin = true;
+                req.session.currentuser = req.body.username;
+                res.redirect('/')
+                
+            }
+
+            catch(err){
+                console.error(err)
+            }
+        }
+    })
+});
+
 
 // connect method for mongoDB
 async function connectmongoDb() {

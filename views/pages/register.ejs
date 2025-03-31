@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('../partials/head') %>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+    <form id="registerForm" action="/registerUser" method="POST">
+        <h2>Account Login</h2>
+        <label for="username">Username:</label>
+        <input type="text" name="username" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="passText" name="password" required>
+
+        <div class="showpass-checkdiv">
+            <checkbox for="showingPass">Show Password</checkbox>
+            <input type="checkbox" id="checkbox">
+        </div>
+        <button type="submit">register</button>
+    </form>
+</body>
+
+</html>
