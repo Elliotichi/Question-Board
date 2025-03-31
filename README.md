@@ -8,7 +8,8 @@ A question board website where you can upvote and downvote questions
 
 ## installation
 1. download repo
-2. run these commands:
+2. put provided .env file in root folder
+3. run these commands:
   - npm install express
   - npm install express-session
   - npm install mongodb-legacy
@@ -17,4 +18,4 @@ A question board website where you can upvote and downvote questions
   - npm install crypto
   - npm install body-parser
   - npm install ejs
-3. run these commands
+4. run command: npm start
