@@ -35,6 +35,7 @@ app.use(session({
 }));
 
 const bodyParser = require('body-parser');
+const { on } = require('events');
 app.use(express.urlencoded({ extended: true }));
 /*dependancies*/
 
@@ -46,8 +47,11 @@ app.get('/', (req, res) => {
     if (!req.session.loggedin) {
         res.render('pages/login.ejs');
     }
+    else if (req.session.ishost) {
+        res.render('pages/host.ejs');
+    }
     else {
-        res.render('pages/index.ejs', {})
+        res.render('pages/index.ejs');
     }
 })
 
@@ -60,7 +64,12 @@ app.get('/getQuestions', async (req, res) => {
 
 // login page route
 app.get('/login', (req, res) => {
-    res.render('pages/login');
+    if (!req.session.loggedin) {
+        res.render('pages/login');
+    }
+    else {
+        res.render('pages/user')
+    }
 })
 
 // register page route
@@ -68,10 +77,10 @@ app.get('/register', (req, res) => {
     res.render('pages/register');
 })
 
-// allows access to session user
-app.get('/getCurrentUser', (req, res) => {
-    res.json({
-        currentuser: req.session.currentuser
+// allows frontend access to session variables
+app.get('/getSession', (req, res) => {
+    res.status(200).json({
+        session: req.session
     });
 });
 
@@ -85,11 +94,11 @@ app.post('/dologin', async (req, res) => {
         if (err) throw err;
         console.log(JSON.stringify(result))
         if (!result) {
-            res.send("<script>alert('invalid Username')</script>;window.location.href = '/login';")
+            res.send("<script>alert('invalid Username');window.location.href = '/login';</script>")
         }
 
         else if (result.password != req.body.password) {
-            res.send("<script>alert('incorrect password')</script>;window.location.href = '/login';")
+            res.send("<script>alert('incorrect password');window.location.href = '/login';</script>")
         }
 
         else if (result.password == req.body.password && result.username == req.body.username) {
@@ -100,6 +109,15 @@ app.post('/dologin', async (req, res) => {
         }
     })
 })
+
+// logs user out
+app.post('/logout', async (req, res) => {
+    req.session.loggedin = false
+    req.session.currentuser = null
+    req.session.ishost = false
+    res.redirect('/login')
+})
+
 
 // adds new question document to MongoDB
 app.post('/postQuestion', async (req, res) => {
@@ -130,35 +148,44 @@ app.post('/updateQuestion', async (req, res) => {
     }
 });
 
+// registers user into the database
 app.post('/registerUser', async (req, res) => {
+    let host;
+
+    // check if the host option is ticked
+    if (req.body.host == "on") {
+        host = true
+    }
+    else {
+        host = false
+    }
+
+    // checks if user already exists
     users.findOne({
         $or: [
             { "username": req.body.username }
         ]
     }, async function (err, existingUser) {
+        if (err) throw err;
         if (existingUser) {
             console.log('user exists')
-            res.redirect('/login')
+            res.send("<script>alert('Account Name already in use, please enter a different one');window.location.href = '/register';</script>")
         }
+        // if user doesnt exist add user to database
         else {
-            try {
-                await users.insertOne(
-                    {
-                        username: req.body.username,
-                        password: req.body.password,
-                        host: req.body.host
-                    }
-                )
-                req.session.loggedin = true;
-                req.session.currentuser = req.body.username;
-                req.session.ishost = req.body.host
-                res.redirect('/')
-                
-            }
 
-            catch(err){
-                console.error(err)
-            }
+            await users.insertOne(
+                {
+                    username: req.body.username,
+                    password: req.body.password,
+                    host: host
+                }
+            )
+            req.session.loggedin = true;
+            req.session.currentuser = req.body.username;
+            req.session.ishost = host
+            res.redirect('/')
+
         }
     })
 });
@@ -167,9 +194,7 @@ app.post('/registerUser', async (req, res) => {
 // connect method for mongoDB
 async function connectmongoDb() {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
-        // Send a ping to confirm a successful connection
         await db.command({ ping: 1 })
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } catch (err) {

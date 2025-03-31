@@ -5,7 +5,7 @@ let user;
 $(document).ready(function () {
     console.log("index script launched loaded")
     getQuestions()
-    getCurrentUser()
+    getSession()
 
     $('#postBtn').click(function () {
         makePostWindow()
@@ -63,17 +63,22 @@ function makeComponents(question) {
             console.log(question.upvotes)
         }
 
-        // toggles upvote and downvote.
+        // toggles upvote
         else {
+
+            // finds the viewer section related to the current user in the question
             const viewer = question.viewers.find(viewer => viewer.username == user)
             switch (viewer.upvote) {
+
+                // if user has upvoted take away upvote
                 case true:
                     question.upvotes--;
                     viewer.upvote = false
                     console.log("Removing downvote from: ", question._id)
                     upvoteBtn.removeClass('active')
                     break;
-
+                
+                // otherwise add an upvote
                 default:
                     question.upvotes++
                     viewer.upvote = true
@@ -104,13 +109,16 @@ function makePostWindow() {
         postWindow.remove()
     })
 
+    // posts question using the input
     submitBtn.click(async function () {
         let text = $('#questionTextField').val()
+
+        //checks that the input is not empty
         if (text.trim() === "") {
             alert("please enter a question.");
             return;
         }
-
+        
         let question = { 'author': user, 'text': text, 'upvotes': 0, 'viewers': [] }
         await postQuestion(question)
         console.log("i resolved")
@@ -124,13 +132,13 @@ function makePostWindow() {
 /* ajax calls */
 
 // Retrieves sessions current user from the server
-function getCurrentUser() {
+function getSession() {
     $.ajax({
-        url: '/getCurrentUser',
+        url: '/getSession',
         method: 'GET',
         success: function (data) {
-            console.log("server has returned: " + data.currentuser)
-            user = data.currentuser;
+            console.log("server has returned: " + data.session.currentuser)
+            user = data.session.currentuser;
 
         },
         error: function (error) {

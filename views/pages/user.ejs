@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('../partials/head') %>
+    <script src="scripts\user.js"></script>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+    <form action="/logout" method="POST">
+        <h2 id="userInfo"></h2>
+        <h2 id="hostInfo"></h2>
+       <button type="submit">logout</button>
+    </form>
+
+</body>
+
+</html>
