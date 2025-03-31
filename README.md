@@ -3,8 +3,8 @@ A question board website where you can upvote and downvote questions
 
 
 ## requirements
-Node.js
-A computer
+- Node.js
+- A computer
 
 ## installation
 1. download repo
