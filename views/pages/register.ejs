@@ -8,7 +8,7 @@
 <body>
     <%- include('../partials/navbar') %>
     <form id="registerForm" action="/registerUser" method="POST">
-        <h2>Account Login</h2>
+        <h2>Account register</h2>
         <label for="username">Username:</label>
         <input type="text" name="username" required>
 
@@ -16,8 +16,8 @@
         <input type="password" id="passText" name="password" required>
 
         <div class="showpass-checkdiv">
-            <checkbox for="showingPass">Show Password</checkbox>
-            <input type="checkbox" id="checkbox">
+            <checkbox for="showingPass">are you a host?</checkbox>
+            <input type="checkbox" name="host" id="hostCheckbox">
         </div>
         <button type="submit">register</button>
     </form>

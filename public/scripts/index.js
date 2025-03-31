@@ -36,12 +36,21 @@ function makeComponents(question) {
     const questionText = $('<p>').text(question.text);
     const authorText = $('<p>').text('asked by: ' + question.author)
     const numberUpvotes = $('<p>').text(question.upvotes);
-    const upvoteBtn = $("<button>").text("upvote").attr('id', 'upvoteBtn');
+    const upvoteBtn = $("<button>").attr('id', 'upvoteBtn');
+    const icon = $('<i>').attr('class','fa-solid fa-heart')
 
+    upvoteBtn.append(icon)
     textBox.append(questionText);
     buttonBox.append(authorText, upvoteBtn, numberUpvotes);
     questionBox.append(textBox, buttonBox);
     $('#postBox').append(questionBox);
+
+    if (question.viewers.some(viewer => viewer.username == user)) {
+        const viewer = question.viewers.find(viewer => viewer.username == user)
+        if(viewer.upvote == true){
+            upvoteBtn.addClass('active')
+        }
+    }
 
     upvoteBtn.click(function () {
 
@@ -62,12 +71,14 @@ function makeComponents(question) {
                     question.upvotes--;
                     viewer.upvote = false
                     console.log("Removing downvote from: ", question._id)
+                    upvoteBtn.removeClass('active')
                     break;
 
                 default:
                     question.upvotes++
                     viewer.upvote = true
                     console.log("upvoting ", question._id)
+                    upvoteBtn.addClass('active')
                     break;
             }
         }
@@ -95,11 +106,16 @@ function makePostWindow() {
 
     submitBtn.click(async function () {
         let text = $('#questionTextField').val()
+        if (text.trim() === "") {
+            alert("please enter a question.");
+            return;
+        }
+
         let question = { 'author': user, 'text': text, 'upvotes': 0, 'viewers': [] }
         await postQuestion(question)
         console.log("i resolved")
         getQuestions();
-
+        postWindow.remove()
     })
 
 }

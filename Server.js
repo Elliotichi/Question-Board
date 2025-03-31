@@ -95,6 +95,7 @@ app.post('/dologin', async (req, res) => {
         else if (result.password == req.body.password && result.username == req.body.username) {
             req.session.loggedin = true;
             req.session.currentuser = req.body.username;
+            req.session.ishost = result.host
             res.redirect("/")
         }
     })
@@ -144,11 +145,13 @@ app.post('/registerUser', async (req, res) => {
                 await users.insertOne(
                     {
                         username: req.body.username,
-                        password: req.body.password
+                        password: req.body.password,
+                        host: req.body.host
                     }
                 )
                 req.session.loggedin = true;
                 req.session.currentuser = req.body.username;
+                req.session.ishost = req.body.host
                 res.redirect('/')
                 
             }
