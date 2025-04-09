@@ -79,6 +79,7 @@ button.active i{
 
 .hostQuestionBox{
     margin-top: 2%;
+    margin-bottom: 4%;
     padding: 5px;
     border-radius: 6px;
     border-color: var(--bordercolour);
@@ -121,14 +122,20 @@ form {
 }
 
 .fixed {
+    margin-top: 500px;
     position: fixed;
     bottom: 0;              
     left: 0;               
     width: 100%; 
-    padding: 5px;          
+    padding: 1px;          
     background-color: var(--footerColour);
     text-align: center;     
-    z-index: 1000;          
+    z-index: 1000;   
+    padding: 3px;
+}
+
+.gap{
+    margin: 20px;
 }
 
 .postBtn{
